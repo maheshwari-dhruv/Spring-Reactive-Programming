@@ -3,37 +3,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <groupId>com.example</groupId>
+        <artifactId>spring-reactive-programming</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>spring-reactive-programming</artifactId>
+    <artifactId>reactive-programming</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-reactive-programming</name>
-    <description>spring-reactive-programming</description>
-    <packaging>pom</packaging>
+    <name>reactive-programming</name>
+    <description>reactive-programming</description>
     <properties>
         <java.version>17</java.version>
     </properties>
-
-    <modules>
-        <module>reactive-programming</module>
-        <module>movies-info-service</module>
-    </modules>
-
     <dependencies>
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>reactive-programming</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>movies-info-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
