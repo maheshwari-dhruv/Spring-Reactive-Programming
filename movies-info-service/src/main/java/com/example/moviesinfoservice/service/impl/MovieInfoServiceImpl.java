@@ -51,4 +51,14 @@ public class MovieInfoServiceImpl implements MovieInfoService {
         return movieInfoRepository.findById(id)
                 .flatMap(movieInfo1 -> movieInfoRepository.deleteById(id));
     }
+
+    @Override
+    public Flux<MovieInfo> getMovieInfoByYear(Integer year) {
+        return movieInfoRepository.findByYear(year);
+    }
+
+    @Override
+    public Mono<MovieInfo> getMovieInfoByTitle(String title) {
+        return movieInfoRepository.findByTitle(title);
+    }
 }

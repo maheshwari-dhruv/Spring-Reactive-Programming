@@ -10,7 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,11 +34,11 @@ class MovieInfoControllerIntgTest {
     @BeforeEach
     void setUp() {
         List<MovieInfo> movieInfos = List.of(new MovieInfo(null, "Batman Begins",
-                        "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
+                        2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
                 new MovieInfo(null, "The Dark Knight",
-                        "2008", List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
+                        2008, List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
                 new MovieInfo("abc", "Dark Knight Rises",
-                        "2012", List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
+                        2012, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
 
         movieInfoRepository.saveAll(movieInfos)
                 .blockLast(); // only allowed in test cases
@@ -49,7 +52,7 @@ class MovieInfoControllerIntgTest {
     @Test
     void addMovieInfo() {
         MovieInfo movieInfo = new MovieInfo(null, "Batman Begins 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         webTestClient
                 .post()
@@ -79,6 +82,39 @@ class MovieInfoControllerIntgTest {
     }
 
     @Test
+    void getMovieInfoByYear() {
+        // URL Creation
+        URI year = UriComponentsBuilder.fromUriString(POST_PATH)
+                .queryParam("year", 2005)
+                .buildAndExpand().toUri();
+
+        webTestClient
+                .get()
+                .uri(year)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(1);
+    }
+
+    @Test
+    void getMovieInfoByTitle() {
+        // URL Creation
+        URI title = UriComponentsBuilder.fromUriString(POST_PATH + "/title")
+                .queryParam("title", "Batman Begins")
+                .buildAndExpand().toUri();
+
+        webTestClient
+                .get()
+                .uri(title)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody(MovieInfo.class);
+    }
+
+    @Test
     void getMovieInfoById() {
         String id = "abc";
 
@@ -89,7 +125,27 @@ class MovieInfoControllerIntgTest {
                 .expectStatus()
                 .isFound()
                 .expectBody()
-                .jsonPath("$.year").isEqualTo("2012");
+                .jsonPath("$.year").isEqualTo(2012);
+//                .expectBody(MovieInfo.class)
+//                .consumeWith(movieInfoEntityExchangeResult -> {
+//                    MovieInfo responseBody = movieInfoEntityExchangeResult.getResponseBody();
+//                    assertNotNull(responseBody);
+//                    assertEquals("2012", responseBody.getYear());
+//                });
+    }
+
+    @Test
+    void getMovieInfoById_notFound() {
+        String id = "zxc";
+
+        webTestClient
+                .get()
+                .uri(POST_PATH + "/{id}", id)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+//                .expectBody()
+//                .jsonPath("$.year").isEqualTo(2012);
 //                .expectBody(MovieInfo.class)
 //                .consumeWith(movieInfoEntityExchangeResult -> {
 //                    MovieInfo responseBody = movieInfoEntityExchangeResult.getResponseBody();
@@ -102,7 +158,7 @@ class MovieInfoControllerIntgTest {
     void updateMovieInfo() {
         String id = "abc";
         MovieInfo movieInfo = new MovieInfo(null, "Dark Knight Rises 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         webTestClient
                 .put()
@@ -117,6 +173,27 @@ class MovieInfoControllerIntgTest {
                     assertNotNull(responseBody);
                     assertEquals("Dark Knight Rises 1", responseBody.getTitle());
                 });
+    }
+
+    @Test
+    void updateMovieInfo_notFound() {
+        String id = "zxc";
+        MovieInfo movieInfo = new MovieInfo(null, "Dark Knight Rises 1",
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+
+        webTestClient
+                .put()
+                .uri(POST_PATH + "/{id}", id)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+//                .expectBody(MovieInfo.class)
+//                .consumeWith(movieInfoEntityExchangeResult -> {
+//                    MovieInfo responseBody = movieInfoEntityExchangeResult.getResponseBody();
+//                    assertNotNull(responseBody);
+//                    assertEquals("Dark Knight Rises 1", responseBody.getTitle());
+//                });
     }
 
     @Test

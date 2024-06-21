@@ -26,11 +26,11 @@ class MovieInfoRepositoryIntgTest {
     @BeforeEach
     void setUp() {
         List<MovieInfo> movieInfos = List.of(new MovieInfo(null, "Batman Begins",
-                        "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
+                        2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
                 new MovieInfo(null, "The Dark Knight",
-                        "2008", List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
+                        2008, List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
                 new MovieInfo("abc", "Dark Knight Rises",
-                        "2012", List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
+                        2012, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
 
         movieInfoRepository.saveAll(movieInfos)
                 .blockLast(); // only allowed in test cases
@@ -64,7 +64,7 @@ class MovieInfoRepositoryIntgTest {
     @Test
     void saveMovieInfo() {
         MovieInfo saveMovieInfo = new MovieInfo(null, "Batman Begins 1",
-                "2005", List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2005-06-15"));
+                2005, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2005-06-15"));
         Mono<MovieInfo> movieInfoMono = movieInfoRepository.save(saveMovieInfo).log();
 
         StepVerifier.create(movieInfoMono)
@@ -78,13 +78,13 @@ class MovieInfoRepositoryIntgTest {
     @Test
     void updateMovieInfo() {
         MovieInfo abc = movieInfoRepository.findById("abc").block();
-        abc.setYear("2021");
+        abc.setYear(2021);
 
         Mono<MovieInfo> movieInfoMono = movieInfoRepository.save(abc).log();
 
         StepVerifier.create(movieInfoMono)
                 .assertNext(movieInfo -> {
-                    assertEquals("2021", movieInfo.getYear());
+                    assertEquals(2021, movieInfo.getYear());
                 })
                 .verifyComplete();
     }
@@ -96,6 +96,28 @@ class MovieInfoRepositoryIntgTest {
 
         StepVerifier.create(allMovies)
                 .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByYear() {
+        Flux<MovieInfo> movieInfoMono = movieInfoRepository.findByYear(2005).log();
+
+        StepVerifier.create(movieInfoMono)
+                .assertNext(movieInfo -> {
+                    assertEquals("Batman Begins", movieInfo.getTitle());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void findByTitle() {
+        Mono<MovieInfo> movieInfoMono = movieInfoRepository.findByTitle("Batman Begins").log();
+
+        StepVerifier.create(movieInfoMono)
+                .assertNext(movieInfo -> {
+                    assertEquals(2005, movieInfo.getYear());
+                })
                 .verifyComplete();
     }
 }

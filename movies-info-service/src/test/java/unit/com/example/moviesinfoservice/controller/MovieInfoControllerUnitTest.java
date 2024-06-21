@@ -34,11 +34,11 @@ public class MovieInfoControllerUnitTest {
     @Test
     void getAllMovieInfo() {
         List<MovieInfo> movieInfos = List.of(new MovieInfo(null, "Batman Begins",
-                        "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
+                        2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15")),
                 new MovieInfo(null, "The Dark Knight",
-                        "2008", List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
+                        2008, List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-07-18")),
                 new MovieInfo("abc", "Dark Knight Rises",
-                        "2012", List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
+                        2012, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20")));
 
         when(movieInfoServiceMock.getAllMovieInfo()).thenReturn(Flux.fromIterable(movieInfos));
 
@@ -56,7 +56,7 @@ public class MovieInfoControllerUnitTest {
     void getMovieInfoById() {
         String id = "abc";
         MovieInfo movieInfos = new MovieInfo("abc", "Dark Knight Rises",
-                        "2012", List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20"));
+                        2012, List.of("Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20"));
 
         when(movieInfoServiceMock.getMovieInfoById(id)).thenReturn(Mono.just(movieInfos));
 
@@ -79,10 +79,10 @@ public class MovieInfoControllerUnitTest {
     @Test
     void addMovieInfo() {
         MovieInfo movieInfo = new MovieInfo(null, "Batman Begins 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         when(movieInfoServiceMock.addMovieInfo(isA(MovieInfo.class))).thenReturn(Mono.just(new MovieInfo("mockId", "Batman Begins 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"))));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"))));
 
         webTestClient
                 .post()
@@ -100,13 +100,40 @@ public class MovieInfoControllerUnitTest {
     }
 
     @Test
+    void addMovieInfo_Validate() {
+        MovieInfo movieInfo = new MovieInfo(null, "",
+                -2005, List.of(""), LocalDate.parse("2005-06-15"));
+
+        webTestClient
+                .post()
+                .uri(POST_PATH)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    String responseBody = stringEntityExchangeResult.getResponseBody();
+                    System.out.println(responseBody);
+                    assertNotNull(responseBody);
+                    assertEquals("movieInfo.cast must be present,movieInfo.name must be present,movieInfo.year must be positive value", responseBody);
+                });
+//                .expectBody(MovieInfo.class)
+//                .consumeWith(movieInfoEntityExchangeResult -> {
+//                    MovieInfo responseBody = movieInfoEntityExchangeResult.getResponseBody();
+//                    assertNotNull(responseBody);
+//                    assertEquals("mockId", responseBody.getMovieId());
+//                });
+    }
+
+    @Test
     void updateMovieInfo() {
         String id = "abc";
         MovieInfo movieInfo = new MovieInfo(null, "Dark Knight Rises 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         when(movieInfoServiceMock.updateMovieInfo(isA(MovieInfo.class), isA(String.class))).thenReturn(Mono.just(new MovieInfo(id, "Dark Knight Rises 1",
-                "2005", List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"))));
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"))));
 
         webTestClient
                 .put()
